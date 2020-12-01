@@ -6,7 +6,7 @@ eラーニング自動回答ソフトです。
 
 [Polyoxymethylene1607](https://github.com/polyacetal)・
 [noko1024](https://github.com/noko1024)・
-[yugu0202](https://gituhb.com/yugu0202)
+[yugu0202](https://github.com/yugu0202)
 
 ## LICENSE
 
@@ -14,3 +14,4 @@ eラーニング自動回答ソフトです。
 詳しくはLICENSE.txtフォルダをご覧下さい。
 
 ## Special Thanks
+アキラ
