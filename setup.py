@@ -1,4 +1,4 @@
-import os 
+import os
 import platform
 import subprocess
 import zipfile
@@ -12,7 +12,7 @@ def main():
     print("プラットホーム検出中…")
     time.sleep(2)
     pf = platform.system()
-    
+
     if  pf == "Windows":
         WinSetup()
     elif pf == "Darwin":
@@ -31,8 +31,9 @@ def WinSetup():
     print("Google Chrome の存在するファイルのパスを入力してください。")
     path = input("")
     print("セットアップ中…")
-    res=subprocess.check_output('dir /B /O-N "'+path+ '"| findstr "^[0-9].*¥>')
-    
+    res=subprocess.check_output('dir /B/O-N "'+path+ '"|findstr "^[0-9].*¥>',shell=True)
+    print(res)
+
 
 def MacSetup():
     print("プラットホーム検出:macOS")
