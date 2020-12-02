@@ -10,7 +10,7 @@ eラーニング自動回答ソフトです。
 
 ## LICENSE
 
-このアプリケーションはGPLライセンスで配布されます。
+このアプリケーションはGNU Affero General Public Licenseで配布されます。
 詳しくはLICENSE.txtフォルダをご覧下さい。
 
 ## Special Thanks
