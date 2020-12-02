@@ -4,11 +4,13 @@ import subprocess
 import zipfile
 import time
 import re
+import urllib.request
 
 def main():
     print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
     print("Google Chromeが必要です。予めご準備ください。\n")
     time.sleep(3)
+
     #プラットホーム取得
     print("プラットホーム検出中…")
     time.sleep(2)
@@ -23,27 +25,49 @@ def main():
 
 
 def WinSetup():
-    path = ""
     print("プラットホーム検出:Windows")
     print("Google Chrome の存在するファイルのパスを入力してください。")
     path = input("")
     print("セットアップ中…")
+    #クロームのバージョンを検出
     res = subprocess.check_output('dir /B/O-N "'+path+ '"|findstr "^[0-9].*¥>',shell=True)
-    res = res.decode("utf-8")[0:2]
-    print(res)
+    ver = res.decode("utf-8")[0:2]
+    seleniumDownload("win32",ver)
 
 
 def MacSetup():
     print("プラットホーム検出:macOS")
+    #クロームのバージョンを検出
     res = subprocess.check_output("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version",shell=True)
-    res = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
-    print(res)
+    ver = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
+    seleniumDownload("mac64",ver)
 
 
 def LiSetup():
     print("プラットホーム検出:Linux")
+    #クロームのバージョンを検出
     res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
-    res = res.decode("utf-8")[0:2]
-    print(res)
+    ver = res.decode("utf-8")[0:2]
+    seleniumDownload("linux64",ver)
+
+
+def seleniumDownload(OS,version):
+    
+    downloadPath =os.path.join(os.path.split(os.path.realpath(__file__))[0],"temp.zip")
+    
+    #クロームのバージョンに応じたseleniumの最新バージョンを取得
+    req = urllib.request.Request("https://chromedriver.storage.googleapis.com/LATEST_RELEASE_"+version)
+    with urllib.request.urlopen(req) as res:
+        seleniumVer=res.read().decode("utf-8")
+    
+    #seleniumのzipをダウンロード
+    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/"+seleniumVer+"/chromedriver_"+OS+".zip",downloadPath)
+
+    #ZIPファイルを解凍しlibファイルに格納
+    with zipfile.ZipFile(downloadPath) as existing_zip:
+        seleniumPath=os.path.join(os.path.split(os.path.realpath(__file__))[0],"lib")
+        os.mkdir(seleniumPath)
+        existing_zip.extractall(seleniumPath)
+    os.remove(downloadPath)
 
 main()
