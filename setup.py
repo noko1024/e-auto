@@ -28,17 +28,20 @@ def WinSetup():
     path = input("")
     print("セットアップ中…")
     res = subprocess.check_output('dir /B/O-N "'+path+ '"|findstr "^[0-9].*¥>',shell=True)
+    res = res.decode("utf-8")[0:2]
     print(res)
 
 
 def MacSetup():
     print("プラットホーム検出:macOS")
     res = subprocess.check_output("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version",shell=True)
-    pass
+    res = res.decode("utf-8")[0:2]
+    print(res)
 
 def LiSetup():
     print("プラットホーム検出:Linux")
     res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
+    res = res.decode("utf-8")[0:2]
     print(res)
 
 main()
