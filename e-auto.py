@@ -16,7 +16,7 @@ user_pass = getpass.getpass("pass>")
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--ignore-ssl-errors')
-browser = webdriver.Chrome("chromedriver_path",chrome_options=options)
+browser = webdriver.Chrome(chromedriver_path,options=options)
 browser.implicitly_wait(1)
 
 #ログイン用の関数
