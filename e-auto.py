@@ -7,26 +7,31 @@ import getpass
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
+#ユーザー情報の入力待機
 chromedriver_path = input("chromedriverpath>")#Chromedriverのディレクトリパス
-user_id = input("id>")#e-LearningのID
+user_id = input("id>")
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
 #初期設定
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--ignore-ssl-errors')
-browser = webdriver.Chrome(chromedriver_path,chrome_options=options)
+browser = webdriver.Chrome(chromedriver_path,options=options)
 browser.implicitly_wait(1)
 
+#ログイン用の関数
 def login():
+    #ログインのURL
     url_login = "https://www.brains-el.jp/"
     browser.get(url_login)
-    element = browser.find_element_by_xpath('//*[@data-name="login_id"]')
-    element.clear()
-    element.send_keys(user_id)
-    element = browser.find_element_by_xpath('//*[@data-name="password"]')
-    element.clear()
-    element.send_keys(user_pass)
+    #ユーザー情報の送信
+    e = browser.find_element_by_xpath('//*[@data-name="login_id"]')
+    e.clear()
+    e.send_keys(user_id)
+    e = browser.find_element_by_xpath('//*[@data-name="password"]')
+    e.clear()
+    e.send_keys(user_pass)
+    #ログインボタンのクリック
     btn = browser.find_element_by_css_selector('button.btn.btn-default.pull-right')
     btn.click()
 
