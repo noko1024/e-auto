@@ -3,6 +3,7 @@ import platform
 import subprocess
 import zipfile
 import time
+import re
 
 def main():
     print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
@@ -35,7 +36,7 @@ def WinSetup():
 def MacSetup():
     print("プラットホーム検出:macOS")
     res = subprocess.check_output("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version",shell=True)
-    res = res.decode("utf-8")[0:2]
+    res = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
     print(res)
 
 def LiSetup():
