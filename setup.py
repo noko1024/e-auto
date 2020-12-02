@@ -39,6 +39,7 @@ def MacSetup():
     res = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
     print(res)
 
+
 def LiSetup():
     print("プラットホーム検出:Linux")
     res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
