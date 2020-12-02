@@ -8,9 +8,9 @@ import getpass
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
 #ユーザー情報の入力待機
-chromedriver_path = input("chromedriverpath>")
+chromedriver_path = input("chromedriverpath>")#Chromedriverのディレクトリパス
 user_id = input("id>")
-user_pass = getpass.getpass("pass>")
+user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
 #初期設定
 options = webdriver.ChromeOptions()
@@ -35,4 +35,12 @@ def login():
     btn = browser.find_element_by_css_selector('button.btn.btn-default.pull-right')
     btn.click()
 
-login()
+
+def main():
+    login()
+    btn = browser.find_element_by_css_selector('button.button.btn.btn-large.btn-.learning.text-center.center-block.blue_green')
+    btn.click()
+
+
+if __name__ == "__main__":
+    main()
