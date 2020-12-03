@@ -1,7 +1,7 @@
 import os
 import requests
 from selenium import webdriver
-import bs4
+from bs4 import BeautifulSoup
 import lxml
 import getpass
 import time
@@ -42,19 +42,26 @@ def LessonProgressGet():
             time.sleep(1)
             browser.refresh()
             continue
-        
-        soup = bs4(browser.page_source,"lxml")
-        lesson = soup.find_all("div",{"class":"panel panel-success"})
+
+        soup = BeautifulSoup(browser.page_source,"lxml")
+        lesson = soup.find("div",{"class":"panel panel-success"})
         if not lesson:
             break
-        lessonList=lesson.select("")
+        progress_div_list = lesson.select("div.progress_rate")
+
+        for progress in progress_div_list:
+            percent = progress.find("span")
+            print(percent.get_text())
+
+        break
 
 
 def main():
     login()
-    browser.get("https://www.brains-el.jp/dashboard/")
+    time.sleep(10)
     btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
     btn.click()
+    LessonProgressGet()
 
 
 if __name__ == "__main__":
