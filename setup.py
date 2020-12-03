@@ -62,11 +62,13 @@ def seleniumDownload(OS,version):
     with urllib.request.urlopen(req) as res:
         seleniumVer = res.read().decode("utf-8")
     
-    seleniumVer = re.search(r'\d+.*',seleniumVer).group()
+    seleniumVer = re.search(r'\d+.*',seleniumVer)
     
-    if seleniumVer == "":
+    if seleniumVer is None:
         print("non support Chrome version")
         return
+    else:
+        seleniumVer = seleniumVer.group()
     
     #seleniumのzipをダウンロード
     urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/"+seleniumVer+"/chromedriver_"+OS+".zip",downloadPath)
