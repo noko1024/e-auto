@@ -9,10 +9,10 @@ basePath = os.path.split(os.path.realpath(__file__))[0]
 
 #ユーザー情報の入力待機
 chromedriver_path = input("chromedriverpath>")#Chromedriverのディレクトリパス
-user_id = input("id>")
+user_id = input("id>")#e-LeaningのID
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
-#初期設定
+#Chromeの起動
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--ignore-ssl-errors')
