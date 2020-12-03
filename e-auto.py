@@ -14,8 +14,8 @@ user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
 #Chromeの起動
 options = webdriver.ChromeOptions()
-options.add_argument('--ignore-certificate-errors')
-options.add_argument('--ignore-ssl-errors')
+options.add_argument("--ignore-certificate-errors")
+options.add_argument("--ignore-ssl-errors")
 browser = webdriver.Chrome(chromedriver_path,options=options)
 browser.implicitly_wait(1)
 
@@ -25,20 +25,21 @@ def login():
     url_login = "https://www.brains-el.jp/"
     browser.get(url_login)
     #ユーザー情報の送信
-    e = browser.find_element_by_xpath('//*[@data-name="login_id"]')
+    e = browser.find_element_by_xpath("//*[@data-name=\"login_id\"]")
     e.clear()
     e.send_keys(user_id)
-    e = browser.find_element_by_xpath('//*[@data-name="password"]')
+    e = browser.find_element_by_xpath("//*[@data-name=\"password\"]")
     e.clear()
     e.send_keys(user_pass)
     #ログインボタンのクリック
-    btn = browser.find_element_by_css_selector('button.btn.btn-default.pull-right')
+    btn = browser.find_element_by_css_selector(".btn.btn-default.pull-right")
     btn.click()
 
 
 def main():
     login()
-    btn = browser.find_element_by_css_selector('button.button.btn.btn-large.btn-.learning.text-center.center-block.blue_green')
+    browser.get("https://www.brains-el.jp/dashboard/")
+    btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
     btn.click()
 
 
