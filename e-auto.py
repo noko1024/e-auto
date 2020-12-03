@@ -4,6 +4,7 @@ from selenium import webdriver
 import bs4
 import lxml
 import getpass
+import time
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
@@ -34,6 +35,19 @@ def login():
     #ログインボタンのクリック
     btn = browser.find_element_by_css_selector(".btn.btn-default.pull-right")
     btn.click()
+
+def LessonProgressGet():
+    while True:
+        if not browser.page_source:
+            time.sleep(1)
+            browser.refresh()
+            continue
+        
+        soup = bs4(browser.page_source,"lxml")
+        lesson = soup.find_all("div",{"class":"panel panel-success"})
+        if not lesson:
+            break
+        lessonList=lesson.select("")
 
 
 def main():
