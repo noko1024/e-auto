@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import lxml
 import getpass
 import time
+import re
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
@@ -55,7 +56,10 @@ def LessonProgressGet():
 
         for progress in progress_div_list:
             percent = progress.find("span")
-            print(percent.get_text())
+			percent = re.search(r"\d+",percent.get_text())
+			if percent is None:
+				continue
+            print(percent.group())
 
         break
 
