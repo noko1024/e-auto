@@ -38,15 +38,19 @@ def login():
 
 def LessonProgressGet():
     while True:
-        if not browser.page_source:
+        browser_source = browser.page_source
+        #ページソースがなければ==読み込みに失敗したら一秒待ってF5
+        if not browser_source:
             time.sleep(1)
             browser.refresh()
             continue
 
-        soup = BeautifulSoup(browser.page_source,"lxml")
+        soup = BeautifulSoup(browser_source,"lxml")
         lesson = soup.find("div",{"class":"panel panel-success"})
-        if not lesson:
+        
+        if lesson is None:
             break
+        
         progress_div_list = lesson.select("div.progress_rate")
 
         for progress in progress_div_list:
@@ -58,8 +62,8 @@ def LessonProgressGet():
 
 def main():
     login()
-    time.sleep(10)
     btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
+    time.sleep(1)
     btn.click()
     LessonProgressGet()
 
