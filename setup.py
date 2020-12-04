@@ -8,6 +8,8 @@ import urllib.request
 from pip._internal import main as pipcom
 import importlib
 
+elog_path = os.path.join(os.path.split(os.path.realpath(__file__))[0],"error.log")
+
 def main():
     print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
     print("Google Chromeが必要です。予めご準備ください。\n")
@@ -19,14 +21,49 @@ def main():
     pf = platform.system()
 
     if  pf == "Windows":
-        WinSetup()
+        try:
+            ver = WinSetup()
+            seleniumDownload("win32",ver)
+        
+        except Exception as e:
+            with open(elog_path,mode="a") as f:
+                f.write(str(e))                
+            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
+            return 1
+
+
     elif pf == "Darwin":
-        MacSetup()
+        try:
+            ver = MacSetup()
+            seleniumDownload("mac64",ver)
+
+        except Exception as e:
+            with open(elog_path,mode="a") as f:
+                f.write(str(e))  
+            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
+            return 1
+
+
     elif pf =="Linux":
-        LiSetup()
+        try:
+            ver = LiSetup()
+            seleniumDownload("linux64",ver)
+
+        except Exception as e:
+            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
+            with open(elog_path,mode="a") as f:
+                f.write(str(e))  
+            return 1
     
     #ライブラリインストール
-    pipInstall()
+    try:
+        pipInstall()
+    except Exception as e:
+        print("ライブラリのインストール中に問題が発生しました。\nエラーログを参照して下さい。")
+        with open(elog_path,mode="a") as f:
+            f.write(str(e))
+        return 1
+    
     print("セットアップは正常に終了しました。")
     input("")
 
@@ -35,10 +72,14 @@ def WinSetup():
     print("プラットホーム検出:Windows")
     path = ""
     print("セットアップ中…")
-    #クロームのバージョンを検出
-    res = subprocess.check_output('dir /B/O-N "C:\Program Files\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
+
+    #クロームのバージョンを検出 (x86ユーザーもいたので…)
+    try:
+        res = subprocess.check_output('dir /B/O-N "C:\Program Files\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
+    except:
+        res = subprocess.check_output('dir /B/O-N "C:\Program Files(x86) \Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
     ver = res.decode("utf-8")[0:2]
-    seleniumDownload("win32",ver)
+    return ver
 
 
 def MacSetup():
@@ -46,7 +87,7 @@ def MacSetup():
     #クロームのバージョンを検出
     res = subprocess.check_output("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version",shell=True)
     ver = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
-    seleniumDownload("mac64",ver)
+    return ver
 
 
 def LiSetup():
@@ -54,7 +95,7 @@ def LiSetup():
     #クロームのバージョンを検出
     res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
     ver = res.decode("utf-8")[0:2]
-    seleniumDownload("linux64",ver)
+    return ver
 
 
 def seleniumDownload(OS,version):
