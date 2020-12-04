@@ -8,7 +8,8 @@ import urllib.request
 from pip._internal import main as pipcom
 import importlib
 
-elog_path = os.path.join(os.path.split(os.path.realpath(__file__))[0],"error.log")
+basePath = os.path.split(os.path.realpath(__file__))[0]
+elog_path = os.path.join(basePath,"error.log")
 
 def main():
     print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
@@ -99,7 +100,6 @@ def LiSetup():
 
 def seleniumDownload(OS,version):
     
-    basePath = os.path.split(os.path.realpath(__file__))[0]
     
     downloadPath = os.path.join(basePath,"temp.zip")
     
