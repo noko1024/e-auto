@@ -37,6 +37,32 @@ def login():
     btn = browser.find_element_by_css_selector(".btn.btn-default.pull-right")
     btn.click()
 
+def LessonDataGet():
+	while True:
+		browser_source = browser.page_source
+        #ページソースがなければ==読み込みに失敗したら一秒待ってF5
+        if not browser_source:
+            time.sleep(1)
+            browser.refresh()
+            continue
+
+        soup = BeautifulSoup(browser_source,"lxml")
+        lesson = soup.find("div",{"class":"panel panel-success"})
+        
+        if lesson is None:
+            break
+        
+        progress_div_list = lesson.select("div.progress_rate")
+_
+        for progress in progress_div_list:
+            percent = progress.find("span")
+			percent = re.search(r"\d+",percent.get_text())
+			if percent is None:
+				continue
+            print(percent.group())
+
+			break
+
 def LessonProgressGet():
     while True:
         browser_source = browser.page_source
