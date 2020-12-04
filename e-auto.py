@@ -48,12 +48,12 @@ def LessonDataGet():
 
         soup = BeautifulSoup(browser_source,"lxml")
         lesson = soup.find("div",{"class":"panel panel-success"})
-        
+
         if lesson is None:
             break
-        
+
         progress_div_list = lesson.select("div.progress_rate")
-_
+
         for progress in progress_div_list:
             percent = progress.find("span")
 			percent = re.search(r"\d+",percent.get_text())
@@ -61,7 +61,7 @@ _
 				continue
             print(percent.group())
 
-			break
+		break
 
 def LessonProgressGet():
     while True:
@@ -74,10 +74,10 @@ def LessonProgressGet():
 
         soup = BeautifulSoup(browser_source,"lxml")
         lesson = soup.find("div",{"class":"panel panel-success"})
-        
+
         if lesson is None:
             break
-        
+
         progress_div_list = lesson.select("div.progress_rate")
 
         for progress in progress_div_list:
