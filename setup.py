@@ -5,6 +5,8 @@ import zipfile
 import time
 import re
 import urllib.request
+from pip._internal import main as pipcom
+import importlib
 
 def main():
     print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
@@ -22,15 +24,19 @@ def main():
         MacSetup()
     elif pf =="Linux":
         LiSetup()
+    
+    #ライブラリインストール
+    pipInstall()
+    print("セットアップは正常に終了しました。")
+    input("")
 
 
 def WinSetup():
     print("プラットホーム検出:Windows")
-    print("Google Chrome の存在するファイルのパスを入力してください。")
-    path = input("")
+    path = ""
     print("セットアップ中…")
     #クロームのバージョンを検出
-    res = subprocess.check_output('dir /B/O-N "'+path+ '"|findstr "^[0-9].*¥>',shell=True)
+    res = subprocess.check_output('dir /B/O-N "C:\Program Files\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
     ver = res.decode("utf-8")[0:2]
     seleniumDownload("win32",ver)
 
@@ -52,7 +58,7 @@ def LiSetup():
 
 
 def seleniumDownload(OS,version):
-
+    
     basePath = os.path.split(os.path.realpath(__file__))[0]
     
     downloadPath = os.path.join(basePath,"temp.zip")
@@ -65,21 +71,43 @@ def seleniumDownload(OS,version):
     seleniumVer = re.search(r'\d+.*',seleniumVer)
     
     if seleniumVer is None:
-        print("non support Chrome version")
+        print("現在インストールされている Google Chrome はサポート対象外です。\n他のバーションでお試し下さい")
         return
     else:
         seleniumVer = seleniumVer.group()
     
     #seleniumのzipをダウンロード
+    print("seleniumをダウンロードしています…")
     urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/"+seleniumVer+"/chromedriver_"+OS+".zip",downloadPath)
 
-    seleniumPath = os.path.join(os.path.split(basePath,"lib")
-    os.mkdir(seleniumPath)
+    seleniumPath = os.path.join(basePath,"lib")
+    
+    #既にlibフォルダがあるときはmkdirをスキップ
+    try:
+        os.mkdir(seleniumPath)
+    except:
+        pass
 
     #ZIPファイルを解凍しlibファイルに格納
     with zipfile.ZipFile(downloadPath) as existing_zip:
         existing_zip.extractall(seleniumPath)
 
     os.remove(downloadPath)
+
+    print("seleniumのダウンロード完了")
+    time.sleep(1)
+
+def pipInstall():
+    print("必要なライブラリをインストール中…\n")
+    install_list = ["selenium","bs4","lxml","requests"]
+    for lib_name in install_list:
+        try:
+            importlib.import_module(lib_name)
+        except ImportError:
+            pipcom(["install",lib_name])
+    print("\nライブラリのインストール完了")
+    time.sleep(1)
+
+
 
 main()
