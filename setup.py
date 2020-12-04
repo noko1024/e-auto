@@ -67,7 +67,6 @@ def main():
     print("セットアップは正常に終了しました。")
     input("")
 
-
 def WinSetup():
     print("プラットホーム検出:Windows")
     path = ""
