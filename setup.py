@@ -52,22 +52,34 @@ def LiSetup():
 
 
 def seleniumDownload(OS,version):
+
+    basePath = os.path.split(os.path.realpath(__file__))[0]
     
-    downloadPath =os.path.join(os.path.split(os.path.realpath(__file__))[0],"temp.zip")
+    downloadPath = os.path.join(basePath,"temp.zip")
     
     #クロームのバージョンに応じたseleniumの最新バージョンを取得
     req = urllib.request.Request("https://chromedriver.storage.googleapis.com/LATEST_RELEASE_"+version)
     with urllib.request.urlopen(req) as res:
-        seleniumVer=res.read().decode("utf-8")
+        seleniumVer = res.read().decode("utf-8")
+    
+    seleniumVer = re.search(r'\d+.*',seleniumVer)
+    
+    if seleniumVer is None:
+        print("non support Chrome version")
+        return
+    else:
+        seleniumVer = seleniumVer.group()
     
     #seleniumのzipをダウンロード
     urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/"+seleniumVer+"/chromedriver_"+OS+".zip",downloadPath)
 
+    seleniumPath = os.path.join(os.path.split(basePath,"lib")
+    os.mkdir(seleniumPath)
+
     #ZIPファイルを解凍しlibファイルに格納
     with zipfile.ZipFile(downloadPath) as existing_zip:
-        seleniumPath=os.path.join(os.path.split(os.path.realpath(__file__))[0],"lib")
-        os.mkdir(seleniumPath)
         existing_zip.extractall(seleniumPath)
+
     os.remove(downloadPath)
 
 main()
