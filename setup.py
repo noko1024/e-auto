@@ -66,7 +66,8 @@ def main():
         return 1
     
     print("セットアップは正常に終了しました。")
-    input("")
+    time.sleep(1)
+    input("Press Enter key")
 
 def WinSetup():
     print("プラットホーム検出:Windows")
