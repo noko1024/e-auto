@@ -10,7 +10,11 @@ import re
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
 #ユーザー情報の入力待機
-chromedriver_path = os.path.join(basePath,"lib/chromedriver.exe")#Chromedriverのディレクトリパス
+chromedriver_path = "" #Chromedriverのディレクトリパス
+if os.name == "nt":
+    chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
+else:
+    chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
 user_id = input("id>")#e-LeaningのID
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
