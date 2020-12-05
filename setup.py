@@ -78,7 +78,7 @@ def WinSetup():
     try:
         res = subprocess.check_output('dir /B/O-N "C:\Program Files\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
     except:
-        res = subprocess.check_output('dir /B/O-N "C:\Program Files(x86) \Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
+        res = subprocess.check_output('dir /B/O-N "C:\Program Files (x86)\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
     ver = res.decode("utf-8")[0:2]
     return ver
 
