@@ -15,6 +15,7 @@ if os.name == "nt":
     chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
 else:
     chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+chromedriver_path = "D:\download\chrome\chromedriver.exe"
 user_id = input("id>")#e-LeaningのID
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
@@ -127,13 +128,24 @@ def AutoQuestionSelect(lesson_URL):
 		btn.click()
 
 		print(question_type)
-
+		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
+		GetAns()
 
 		#これはすぐ飛ばないようにする為
 		time.sleep(30)
 		#これは多分解答後に自動的に戻されるはずなのでいらないかも(自動解答出来上がるまでは必須)
 		browser.get(root_URL+lesson_URL)
+
+def GetAns():
+
+	soup = BeautifulSoup(browser.page_source,"lxml")
+	question_japanese = soup.find("p",{"class":"hint_japanese"}).get_text()
+	question_text = soup.find("p",{"class":"blanked_text"}).get_text()
+	question_text = re.sub("-+","",question_text)
+	print("question")
+	print(question_japanese,question_text)
+	print("----")
 
 def main():
 	login()
