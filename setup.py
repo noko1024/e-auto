@@ -1,154 +1,346 @@
 import os
-import platform
-import subprocess
-import zipfile
+import requests
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import lxml
+import getpass
 import time
 import re
-import urllib.request
-from pip._internal import main as pipcom
-import importlib
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
-elog_path = os.path.join(basePath,"error.log")
+
+#ユーザー情報の入力待機
+chromedriver_path = "" #Chromedriverのディレクトリパス
+if os.name == "nt":
+	chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
+else:
+	chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+chromedriver_path = "D:\download\chrome\chromedriver.exe"
+user_id = input("id>")#e-LeaningのID
+user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
+
+#Chromeの起動
+options = webdriver.ChromeOptions()
+options.add_argument("--ignore-certificate-errors")
+options.add_argument("--ignore-ssl-errors")
+browser = webdriver.Chrome(chromedriver_path,options=options)
+browser.implicitly_wait(1)
+
+root_URL = "https://www.brains-el.jp"
+
+#ログイン用の関数
+def login():import os
+import requests
+from selenium import webdriver
+from bs4 import BeautifulSoup
+import lxml
+import getpass
+import time
+import re
+
+basePath = os.path.split(os.path.realpath(__file__))[0]
+
+#ユーザー情報の入力待機
+chromedriver_path = "" #Chromedriverのディレクトリパス
+if os.name == "nt":
+	chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
+else:
+	chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+chromedriver_path = "D:\download\chrome\chromedriver.exe"
+user_id = input("id>")#e-LeaningのID
+user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
+
+#Chromeの起動
+options = webdriver.ChromeOptions()
+options.add_argument("--ignore-certificate-errors")
+options.add_argument("--ignore-ssl-errors")
+browser = webdriver.Chrome(chromedriver_path,options=options)
+browser.implicitly_wait(1)
+
+root_URL = "https://www.brains-el.jp"
+
+#ログイン用の関数
+def login():
+	#ログインのURL
+	url_login = "https://www.brains-el.jp/"
+	browser.get(url_login)
+	#ユーザー情報の送信
+	e = browser.find_element_by_xpath("//*[@data-name=\"login_id\"]")
+	e.clear()
+	e.send_keys(user_id)
+	e = browser.find_element_by_xpath("//*[@data-name=\"password\"]")
+	e.clear()
+	e.send_keys(user_pass)
+	#ログインボタンのクリック
+	btn = browser.find_element_by_css_selector(".btn.btn-default.pull-right")
+	btn.click()
+
+#lessonの進捗度100%じゃないもののURLのリストを返す関数
+def LessonDataGet():
+	while True:
+		browser_source = browser.page_source
+		#ページソースがなければ==読み込みに失敗したら一秒待ってF5
+		if not browser_source:
+			time.sleep(1)
+			browser.refresh()
+			continue
+
+		soup = BeautifulSoup(browser_source,"lxml")
+		lesson = soup.find("div",{"class":"panel panel-success"})
+
+		if lesson is None:
+			break
+
+		lesson_list = lesson.select(".list-group.subject_list")
+
+		lesson_URL_list = []
+
+		for lesn in lesson_list:
+			percent = LessonProgressGet(lesn)
+			if percent != "100" and percent is not None:
+				lesson_URL_list.append(LessonURLGet(lesn))
+
+		break
+
+	return lesson_URL_list
+
+#lessonの進捗度を取得する関数
+def LessonProgressGet(lesson):
+
+	if lesson is None:
+		return None
+
+	progress_div = lesson.find("div",{"class":"progress_rate"})
+
+	percent = progress_div.find("span")
+	percent = re.search(r"\d+",percent.get_text())
+	if percent is None:
+		return None
+
+	return percent.group()
+
+#lessonのURLを取得する関数
+def LessonURLGet(lesson):
+
+	lesson_URL = lesson.find("a",{"class":"list-group-item clearfix"})
+
+	lesson_URL = lesson_URL.get("href")
+	if lesson_URL is None:
+		return ""
+
+	return lesson_URL
+
+def AutoQuestionSelect(lesson_URL):
+	while True:
+		browser_source = browser.page_source
+		#ページソースがなければ==読み込みに失敗したら一秒待ってF5
+		if not browser_source:
+			time.sleep(1)
+			browser.refresh()
+			continue
+
+		soup = BeautifulSoup(browser_source,"lxml")
+		question_list = soup.select(".each_step")
+
+		if question_list is None:
+			break
+
+		for question in question_list:
+			btn_chk = question.select(".class_button.btn.btn_warning")
+			if btn_chk is None:
+				continue
+			question_type = question.find("span",{"class":"step_name"}).get_text()
+			break
+
+		if not question_type:
+			break
+
+		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
+		btn.click()
+
+		print(question_type)
+		time.sleep(1)
+		#ここで自動解答関数を呼ぶ
+		question_japanese,question_text = GetAns()
+		autoAns(question_japanese,question_text)
+
+		#これはすぐ飛ばないようにする為
+		time.sleep(30)
+		#これは多分解答後に自動的に戻されるはずなのでいらないかも(自動解答出来上がるまでは必須)
+		browser.get(root_URL+lesson_URL)
+
+def GetAns():
+
+	soup = BeautifulSoup(browser.page_source,"lxml")
+	question_japanese = soup.find("p",{"class":"hint_japanese"}).get_text()
+	question_text = soup.find("p",{"class":"blanked_text"}).get_text()
+	question_text = re.sub("-+","",question_text)
+	print("question")
+	print(question_japanese,question_text)
+	print("----")
+
+	return question_japanese , question_text
+
+
+def autoAns(q_jp,q_txt):
+	#json
+	pass
+
 
 def main():
-    print("e-Learning自動回答プログラム <e-auto> セットアップシステムです。")
-    print("Google Chromeが必要です。予めご準備ください。\n")
-    time.sleep(3)
-
-    #プラットホーム取得
-    print("プラットホーム検出中…")
-    time.sleep(2)
-    pf = platform.system()
-
-    if  pf == "Windows":
-        try:
-            ver = WinSetup()
-            seleniumDownload("win32",ver)
-        
-        except Exception as e:
-            with open(elog_path,mode="a") as f:
-                f.write(str(e))                
-            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
-            return 1
+	login()
+	btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
+	time.sleep(1)
+	btn.click()
+	lesson_URL_list = LessonDataGet()
+	for lesson_URL in lesson_URL_list:
+		browser.get(root_URL+lesson_URL)
+		AutoQuestionSelect(lesson_URL)
+		#これはすぐ飛ばないようにする為
+		time.sleep(10)
 
 
-    elif pf == "Darwin":
-        try:
-            ver = MacSetup()
-            seleniumDownload("mac64",ver)
+if __name__ == "__main__":
+	main()
 
-        except Exception as e:
-            with open(elog_path,mode="a") as f:
-                f.write(str(e))  
-            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
-            return 1
+	#ログインのURL
+	url_login = "https://www.brains-el.jp/"
+	browser.get(url_login)
+	#ユーザー情報の送信
+	e = browser.find_element_by_xpath("//*[@data-name=\"login_id\"]")
+	e.clear()
+	e.send_keys(user_id)
+	e = browser.find_element_by_xpath("//*[@data-name=\"password\"]")
+	e.clear()
+	e.send_keys(user_pass)
+	#ログインボタンのクリック
+	btn = browser.find_element_by_css_selector(".btn.btn-default.pull-right")
+	btn.click()
+
+#lessonの進捗度100%じゃないもののURLのリストを返す関数
+def LessonDataGet():
+	while True:
+		browser_source = browser.page_source
+		#ページソースがなければ==読み込みに失敗したら一秒待ってF5
+		if not browser_source:
+			time.sleep(1)
+			browser.refresh()
+			continue
+
+		soup = BeautifulSoup(browser_source,"lxml")
+		lesson = soup.find("div",{"class":"panel panel-success"})
+
+		if lesson is None:
+			break
+
+		lesson_list = lesson.select(".list-group.subject_list")
+
+		lesson_URL_list = []
+
+		for lesn in lesson_list:
+			percent = LessonProgressGet(lesn)
+			if percent != "100" and percent is not None:
+				lesson_URL_list.append(LessonURLGet(lesn))
+
+		break
+
+	return lesson_URL_list
+
+#lessonの進捗度を取得する関数
+def LessonProgressGet(lesson):
+
+	if lesson is None:
+		return None
+
+	progress_div = lesson.find("div",{"class":"progress_rate"})
+
+	percent = progress_div.find("span")
+	percent = re.search(r"\d+",percent.get_text())
+	if percent is None:
+		return None
+
+	return percent.group()
+
+#lessonのURLを取得する関数
+def LessonURLGet(lesson):
+
+	lesson_URL = lesson.find("a",{"class":"list-group-item clearfix"})
+
+	lesson_URL = lesson_URL.get("href")
+	if lesson_URL is None:
+		return ""
+
+	return lesson_URL
+
+def AutoQuestionSelect(lesson_URL):
+	while True:
+		browser_source = browser.page_source
+		#ページソースがなければ==読み込みに失敗したら一秒待ってF5
+		if not browser_source:
+			time.sleep(1)
+			browser.refresh()
+			continue
+
+		soup = BeautifulSoup(browser_source,"lxml")
+		question_list = soup.select(".each_step")
+
+		if question_list is None:
+			break
+
+		for question in question_list:
+			btn_chk = question.select(".class_button.btn.btn_warning")
+			if btn_chk is None:
+				continue
+			question_type = question.find("span",{"class":"step_name"}).get_text()
+			break
+
+		if not question_type:
+			break
+
+		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
+		btn.click()
+
+		print(question_type)
+		time.sleep(1)
+		#ここで自動解答関数を呼ぶ
+		question_japanese,question_text = GetAns()
+		autoAns(question_japanese,question_text)
+
+		#これはすぐ飛ばないようにする為
+		time.sleep(30)
+		#これは多分解答後に自動的に戻されるはずなのでいらないかも(自動解答出来上がるまでは必須)
+		browser.get(root_URL+lesson_URL)
+
+def GetAns():
+
+	soup = BeautifulSoup(browser.page_source,"lxml")
+	question_japanese = soup.find("p",{"class":"hint_japanese"}).get_text()
+	question_text = soup.find("p",{"class":"blanked_text"}).get_text()
+	question_text = re.sub("-+","",question_text)
+	print("question")
+	print(question_japanese,question_text)
+	print("----")
+
+	return question_japanese , question_text
 
 
-    elif pf =="Linux":
-        try:
-            ver = LiSetup()
-            seleniumDownload("linux64",ver)
-
-        except Exception as e:
-            print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
-            with open(elog_path,mode="a") as f:
-                f.write(str(e))  
-            return 1
-    
-    #ライブラリインストール
-    try:
-        pipInstall()
-    except Exception as e:
-        print("ライブラリのインストール中に問題が発生しました。\nエラーログを参照して下さい。")
-        with open(elog_path,mode="a") as f:
-            f.write(str(e))
-        return 1
-    
-    print("セットアップは正常に終了しました。")
-    time.sleep(1)
-    input("Press Enter key")
-
-def WinSetup():
-    print("プラットホーム検出:Windows")
-    path = ""
-    print("セットアップ中…")
-
-    #クロームのバージョンを検出 (x86ユーザーもいたので…)
-    try:
-        res = subprocess.check_output('dir /B/O-N "C:\Program Files\Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
-    except:
-        res = subprocess.check_output('dir /B/O-N "C:\Program Files(x86) \Google\Chrome\Application" |findstr "^[0-9].*¥>',shell=True)
-    ver = res.decode("utf-8")[0:2]
-    return ver
+def autoAns(q_jp,q_txt):
+	#json
+	pass
 
 
-def MacSetup():
-    print("プラットホーム検出:macOS")
-    #クロームのバージョンを検出
-    res = subprocess.check_output("/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version",shell=True)
-    ver = re.search(r'\d+.*',res.decode("utf-8")).group()[0:2]
-    return ver
+def main():
+	login()
+	btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
+	time.sleep(1)
+	btn.click()
+	lesson_URL_list = LessonDataGet()
+	for lesson_URL in lesson_URL_list:
+		browser.get(root_URL+lesson_URL)
+		AutoQuestionSelect(lesson_URL)
+		#これはすぐ飛ばないようにする為
+		time.sleep(10)
 
 
-def LiSetup():
-    print("プラットホーム検出:Linux")
-    #クロームのバージョンを検出
-    res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
-    ver = res.decode("utf-8")[0:2]
-    return ver
-
-
-def seleniumDownload(OS,version):
-    
-    
-    downloadPath = os.path.join(basePath,"temp.zip")
-    
-    #クロームのバージョンに応じたseleniumの最新バージョンを取得
-    req = urllib.request.Request("https://chromedriver.storage.googleapis.com/LATEST_RELEASE_"+version)
-    with urllib.request.urlopen(req) as res:
-        seleniumVer = res.read().decode("utf-8")
-    
-    seleniumVer = re.search(r'\d+.*',seleniumVer)
-    
-    if seleniumVer is None:
-        print("現在インストールされている Google Chrome はサポート対象外です。\n他のバーションでお試し下さい")
-        return
-    else:
-        seleniumVer = seleniumVer.group()
-    
-    #seleniumのzipをダウンロード
-    print("seleniumをダウンロードしています…")
-    urllib.request.urlretrieve("https://chromedriver.storage.googleapis.com/"+seleniumVer+"/chromedriver_"+OS+".zip",downloadPath)
-
-    seleniumPath = os.path.join(basePath,"lib")
-    
-    #既にlibフォルダがあるときはmkdirをスキップ
-    try:
-        os.mkdir(seleniumPath)
-    except:
-        pass
-
-    #ZIPファイルを解凍しlibファイルに格納
-    with zipfile.ZipFile(downloadPath) as existing_zip:
-        existing_zip.extractall(seleniumPath)
-
-    os.remove(downloadPath)
-
-    print("seleniumのダウンロード完了")
-    time.sleep(1)
-
-def pipInstall():
-    print("必要なライブラリをインストール中…\n")
-    install_list = ["selenium","bs4","lxml","requests"]
-    for lib_name in install_list:
-        try:
-            importlib.import_module(lib_name)
-        except ImportError:
-            pipcom(["install",lib_name])
-    print("\nライブラリのインストール完了")
-    time.sleep(1)
-
-
-
-main()
+if __name__ == "__main__":
+	main()
