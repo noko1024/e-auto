@@ -135,6 +135,9 @@ def AutoQuestionSelect(lesson_URL):
 		#これは多分解答後に自動的に戻されるはずなのでいらないかも(自動解答出来上がるまでは必須)
 		browser.get(root_URL+lesson_URL)
 
+def AutoSelect():
+    quest = 
+
 def main():
 	login()
 	btn = browser.find_element_by_css_selector(".button.btn.btn-large.btn-.learning.text-center.center-block.blue_green")
