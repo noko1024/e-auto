@@ -125,6 +125,9 @@ def AutoQuestionSelect(lesson_URL):
 		if not question_type:
 			break
 
+
+		#lesson_num(l) and
+
 		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
 		btn.click()
 
@@ -132,7 +135,7 @@ def AutoQuestionSelect(lesson_URL):
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		question_japanese,question_text = GetAns()
-		autoAns(question_japanese,question_text)
+		AutoAns(question_num,question_japanese,question_text)
 
 		#これはすぐ飛ばないようにする為
 		time.sleep(30)
@@ -142,23 +145,45 @@ def AutoQuestionSelect(lesson_URL):
 def GetAns():
 
 	soup = BeautifulSoup(browser.page_source,"lxml")
-	question_japanese = soup.find("p",{"class":"hint_japanese"}).get_text()
 	question_text = soup.find("p",{"class":"blanked_text"}).get_text()
-	question_text = re.sub("-+","",question_text)
+	question_text: str = re.sub("-+","",question_text)
+	question_japanese: str = soup.find("p",{"class":"hint_japanese"}).get_text()
 	print("question")
 	print(question_japanese,question_text)
 	print("----")
 
 	return question_japanese,question_text
 
-def autoAns(lesson_num,question_type,question_japanese,question_text):
+def AutoAns(lesson_num,question_type,question_japanese,question_text):
 	#jsonFileの読み込み
 	with open(os.path.join(basePath,f"lesson{lesson_num}.json"), encoding='utf-8') as f:
-		ans_json= json.load(f)
+		ans_json = json.load(f)
+
+	answer: list = (ans_json[question_japanese]).sprit()
+	question: list = question_text.sprit()
+
+
 
 	if question_type == "":
 		pass
 
+def AutoAnsExtraction(answer,question):
+	final_Ans: list = []
+	i = 0
+	len(ls) = 6
+	while True:
+		if len(question) == i:
+			break
+
+		j = 0
+		while True:
+			if answer[j] != question[i]:
+				final_Ans.append(answer[j])
+				del answer[j]
+				break
+			j += 1
+
+		n += 1
 
 def main():
 	login()
