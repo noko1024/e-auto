@@ -116,8 +116,8 @@ def AutoQuestionSelect(lesson_URL):
 			break
 
 		for question in question_list:
-			btn_chk = question.select(".class_button.btn.btn_warning")
-			if btn_chk is None:
+			btn_chk = question.select(".class_button.btn.btn-warning")
+			if not btn_chk:
 				continue
 			question_type = question.find("span",{"class":"step_name"}).get_text()
 			break
