@@ -6,16 +6,17 @@ import lxml
 import getpass
 import time
 import re
+import json
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
 #ユーザー情報の入力待機
 chromedriver_path = "" #Chromedriverのディレクトリパス
 if os.name == "nt":
-    chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
+	chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
 else:
-    chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
-chromedriver_path = "D:\download\chrome\chromedriver.exe"
+	chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+
 user_id = input("id>")#e-LeaningのID
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
@@ -130,7 +131,8 @@ def AutoQuestionSelect(lesson_URL):
 		print(question_type)
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
-		GetAns()
+		question_japanese,question_text = GetAns()
+		autoAns(question_japanese,question_text)
 
 		#これはすぐ飛ばないようにする為
 		time.sleep(30)
@@ -146,6 +148,17 @@ def GetAns():
 	print("question")
 	print(question_japanese,question_text)
 	print("----")
+
+	return question_japanese,question_text
+
+def autoAns(lesson_num,question_type,question_japanese,question_text):
+	#jsonFileの読み込み
+	with open(os.path.join(basePath,f"lesson{lesson_num}.json"), encoding='utf-8') as f:
+		ans_json= json.load(f)
+
+	if question_type == "":
+		pass
+
 
 def main():
 	login()
