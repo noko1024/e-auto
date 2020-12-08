@@ -126,7 +126,8 @@ def AutoQuestionSelect(lesson_URL):
 			break
 
 
-		#lesson_num(l) and
+		#lessson_num:lessonいくつかを取得
+		#course_num : courseを取得(通常レッスンとランダム演習の判定に利用)
 
 		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
 		btn.click()
@@ -155,6 +156,9 @@ def GetAns():
 	return question_japanese,question_text
 
 def AutoAns(lesson_num,question_type,question_japanese,question_text):
+	if question_type == "":
+		pass
+
 	#jsonFileの読み込み
 	with open(os.path.join(basePath,f"lesson{lesson_num}.json"), encoding='utf-8') as f:
 		ans_json = json.load(f)
@@ -162,28 +166,24 @@ def AutoAns(lesson_num,question_type,question_japanese,question_text):
 	answer: list = (ans_json[question_japanese]).sprit()
 	question: list = question_text.sprit()
 
+	#解答に必要なリストを取得
+	result: list  = AutoAnsExtraction(list(answer),list(question))
 
 
-	if question_type == "":
-		pass
 
 def AutoAnsExtraction(answer,question):
 	final_Ans: list = []
-	i = 0
-	len(ls) = 6
 	while True:
-		if len(question) == i:
+		if answer == []:
 			break
+		elif answer[0] == question[0]:
+			del answer[0] , question[0]
 
-		j = 0
-		while True:
-			if answer[j] != question[i]:
-				final_Ans.append(answer[j])
-				del answer[j]
-				break
-			j += 1
-
-		n += 1
+		elif answer[0] != question[0]:
+			final_Ans.append(answer[0])
+			del answer[0]
+	
+	return final_Ans
 
 def main():
 	login()
