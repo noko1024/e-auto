@@ -11,7 +11,7 @@ from pip._internal import main as pipcom
 import importlib
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
-elog_path = os.path.join(basePath,"error.log")
+elog_path = os.path.join(basePath,"error.txt")
 
 def WinSetup():
     #クロームのバージョンを検出 (x86ユーザーもいたので…)
@@ -32,7 +32,7 @@ def MacSetup():
 
 def LiSetup():
     #クロームのバージョンを検出
-    res = subprocess.check_output("google-chrome --version|grep -o [0-9].*",shell=True)
+    res = subprocess.check_output("google-chrome sssssssss --version|grep -o [0-9].*",shell=True)
     ver = res.decode("utf-8")[0:2]
     return ver
 
@@ -100,7 +100,7 @@ def Install():
             print("seleniumのダウンロード完了")
         
         except Exception as e:
-            with open(elog_path,mode="a") as f:
+            with open(elog_path,mode="a",encoding="utf_8") as f:
                 print(str(e))
                 print("\n")
                 f.write(str(e))                
@@ -117,7 +117,7 @@ def Install():
             print("seleniumのダウンロード完了")
 
         except Exception as e:
-            with open(elog_path,mode="a") as f:
+            with open(elog_path,mode="a",encoding="utf_8") as f:
                 f.write(str(e))  
             print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
             return 1
@@ -133,7 +133,7 @@ def Install():
 
         except Exception as e:
             print("セットアップ中に問題が発生しました。\nエラーログを参照して下さい。")
-            with open(elog_path,mode="a") as f:
+            with open(elog_path,mode="a",encoding="utf_8") as f:
                 f.write(str(e))  
             return 1
     
@@ -144,7 +144,7 @@ def Install():
         print("\nライブラリのインストール完了")
     except Exception as e:
         print("ライブラリのインストール中に問題が発生しました。\nエラーログを参照して下さい。")
-        with open(elog_path,mode="a") as f:
+        with open(elog_path,mode="a",encoding="utf_8") as f:
             f.write(str(e))
         return 1
     
