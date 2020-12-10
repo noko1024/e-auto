@@ -60,7 +60,7 @@ def LessonDataGet():
 
 		if lesson is None:
 			break
-
+		#TAG
 		lesson_list = lesson.select(".list-group.subject_list")
 
 		lesson_URL_list = []
@@ -136,7 +136,7 @@ def AutoQuestionSelect(lesson_URL):
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		question_japanese,question_text = GetAns()
-		AutoAns(question_num,question_japanese,question_text)
+		AutoAns(question_japanese,question_text)
 
 		#これはすぐ飛ばないようにする為
 		time.sleep(30)
@@ -155,7 +155,7 @@ def GetAns():
 
 	return question_japanese,question_text
 
-def AutoAns(lesson_num,question_type,question_japanese,question_text):
+def AutoAns(question_type,question_japanese,question_text):
 	if question_type == "":
 		pass
 
@@ -168,6 +168,22 @@ def AutoAns(lesson_num,question_type,question_japanese,question_text):
 
 	#解答に必要なリストを取得
 	result: list  = AutoAnsExtraction(list(answer),list(question))
+
+	soup = BeautifulSoup(browser.page_source,"lxml")
+	ans_list = soup.select(".each_choice")
+
+	
+	for ans in ans_list:
+		ans_word = ans.find("span").get_text()
+		if ans_word == result:
+			ans_btn = "." + ans.find("button").get("class").replace(" ",".")
+			break
+
+	btn = browser.find_element_by_css_selector(ans_btn)
+	btn.click()
+
+
+
 
 
 
