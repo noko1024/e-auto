@@ -1,20 +1,24 @@
 import os
 import requests
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 import lxml
 import getpass
 import time
 import re
+import json
+import random
 
 basePath = os.path.split(os.path.realpath(__file__))[0]
 
 #ユーザー情報の入力待機
 chromedriver_path = "" #Chromedriverのディレクトリパス
 if os.name == "nt":
-    chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
+	chromedriver_path=os.path.join(*[basePath,"lib","chromedriver.exe"])
 else:
-    chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+	chromedriver_path = os.path.join(*[basePath,"lib","chromedriver"])
+
 user_id = input("id>")#e-LeaningのID
 user_pass = getpass.getpass("pass>")#e-Leaningのパスワード
 
@@ -58,7 +62,7 @@ def LessonDataGet():
 
 		if lesson is None:
 			break
-
+		#TAG
 		lesson_list = lesson.select(".list-group.subject_list")
 
 		lesson_URL_list = []
@@ -114,8 +118,8 @@ def AutoQuestionSelect(lesson_URL):
 			break
 
 		for question in question_list:
-			btn_chk = question.select(".class_button.btn.btn_warning")
-			if btn_chk is None:
+			btn_chk = question.select(".class_button.btn.btn-warning")
+			if not btn_chk:
 				continue
 			question_type = question.find("span",{"class":"step_name"}).get_text()
 			break
@@ -123,17 +127,154 @@ def AutoQuestionSelect(lesson_URL):
 		if not question_type:
 			break
 
+
+		#lessson_num:lessonいくつかを取得
+		#course_num : courseを取得(通常レッスンとランダム演習の判定に利用)
+
 		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
 		btn.click()
 
 		print(question_type)
-
+		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
+		while True:
+			stop_time = random.randint(3,40)
+			print("sleep in",stop_time)
+			time.sleep(stop_time)
+			print("sleep out")
+			get_bool,question_japanese,question_text = GetAns()
+			print(get_bool)
+			if not get_bool:
+				break
+			AutoAns(question_type,question_japanese,question_text)
 
 		#これはすぐ飛ばないようにする為
-		time.sleep(30)
+		time.sleep(3)
 		#これは多分解答後に自動的に戻されるはずなのでいらないかも(自動解答出来上がるまでは必須)
-		browser.get(root_URL+lesson_URL)
+		#browser.get(root_URL+lesson_URL)
+
+def GetAns():
+
+	count = 1
+	get_bool = True
+	while True:
+		try:
+			soup = BeautifulSoup(browser.page_source,"lxml")
+			question_text = soup.find("p",{"class":"blanked_text"}).get_text()
+			question_text: str = re.sub("-+","",question_text)
+			question_japanese: str = soup.find("p",{"class":"hint_japanese"}).get_text().strip()
+			break
+		except:
+			if count == 2:
+				get_bool = False
+				question_text = None
+				question_japanese = None
+				break
+			else:
+				count += 1
+				print(count)
+				browser.refresh()
+				time.sleep(1)
+				continue
+	print("question")
+	print(question_japanese,question_text)
+	print("----")
+
+	return get_bool,question_japanese,question_text
+
+def AutoAns(question_type,question_japanese,question_text):
+
+	#jsonFileの読み込み
+	with open(os.path.join(basePath,"lesson.json"), encoding='utf-8') as f:
+		ans_json = json.load(f)
+
+	answer: list = (ans_json[question_japanese]).split()
+	print(answer)
+	question: list = question_text.split()
+
+	#解答に必要なリストを取得
+	result: list  = AutoAnsExtraction(list(answer),list(question))
+	result = [res.strip(".") for res in result]
+	print(result)
+	soup = BeautifulSoup(browser.page_source,"lxml")
+
+	if question_type == "択一問題":
+
+		ans_list = soup.select(".each_choice")
+
+		for ans in ans_list:
+			ans_word = ans.get("data-answer")
+
+			print("ans_word:",ans_word)
+			print("word:"+" ".join(result))
+
+			if ans_word == " ".join(result):
+				ans_btn = f"//a[@data-answer=\"{ans_word}\"]/span/button"
+				print(ans_btn)
+				break
+		try:
+			btn = browser.find_element_by_xpath(ans_btn)
+			btn.click()
+		except:
+			browser.refresh()
+			time.sleep(1)
+			btn = browser.find_element_by_xpath(ans_btn)
+			btn.click()
+
+	elif question_type =="並べ替え問題":
+		ans_list = soup.select(".each_choice.ui-draggable.ui-draggable-handle")
+
+		ans_btns = []
+
+		while True:
+			for ans in ans_list:
+				ans_word = ans.get("data-answer")
+
+				print("ans_word:",ans_word)
+				print("word:",result)
+
+				if ans_word == result[0]:
+					result.remove(ans_word)
+					ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
+					print(ans_word)
+					break
+			if not result:
+				break
+
+		for ans_btn in ans_btns:
+			btn = browser.find_element_by_xpath(ans_btn)
+			btn.click()
+
+		btn = browser.find_element_by_css_selector(".answer.btn.btn-warning")
+		btn.click()
+
+	elif question_type == "空所記入問題":
+		e = browser.find_element_by_xpath("//*[@data-name=\"login_id\"]")
+		e.clear()
+		e.send_keys(user_id)
+
+	stop_time = random.randint(1,3)
+	time.sleep(stop_time)
+
+	btn = browser.find_element_by_css_selector(".btn.btn-default.next_question")
+	btn.click()
+
+
+
+
+def AutoAnsExtraction(answer,question):
+	final_Ans: list = []
+	while True:
+		if answer == []:
+			break
+		elif answer[0] == question[0]:
+			del answer[0] , question[0]
+
+		elif answer[0] != question[0]:
+			final_Ans.append(answer[0])
+			del answer[0]
+
+	return final_Ans
 
 def AutoSelect():
     quest = 
@@ -153,3 +294,4 @@ def main():
 
 if __name__ == "__main__":
 	main()
+	input("PLEASE PRESS ENTER")
