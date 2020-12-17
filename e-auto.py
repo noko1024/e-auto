@@ -257,7 +257,7 @@ def AutoAns(question_type,question_japanese,question_text):
 			ans_form.send_keys(ans)
 			time.sleep(0.5)
 
-		btn = browser.find_element_by_xpath(".answer.btn.btn-warning")
+		btn = browser.find_element_by_css_selector(".answer.btn.btn-warning")
 		btn.click()
 
 	stop_time = random.randint(1,3)
