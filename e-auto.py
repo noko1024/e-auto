@@ -194,7 +194,7 @@ def AutoAns(question_type,question_japanese,question_text):
 
 	#解答に必要なリストを取得
 	result: list  = AutoAnsExtraction(list(answer),list(question))
-	result = [res.strip(".") for res in result]
+	result = [res.strip(".").strip("?").strip("!") for res in result]
 	print(result)
 	soup = BeautifulSoup(browser.page_source,"lxml")
 
@@ -216,19 +216,21 @@ def AutoAns(question_type,question_japanese,question_text):
 			btn = browser.find_element_by_xpath(ans_btn)
 			btn.click()
 		except:
-			browser.refresh()
 			time.sleep(1)
 			btn = browser.find_element_by_xpath(ans_btn)
 			btn.click()
 
 	elif question_type =="並べ替え問題":
+
 		ans_list = soup.select(".each_choice.ui-draggable.ui-draggable-handle")
 
 		ans_btns = []
 
 		while True:
+
 			for ans in ans_list:
-				ans_word = ans.get("data-answer")
+				#選択肢の中身
+				ans_word : str = ans.get("data-answer")
 
 				print("ans_word:",ans_word)
 				print("word:",result)
@@ -249,9 +251,14 @@ def AutoAns(question_type,question_japanese,question_text):
 		btn.click()
 
 	elif question_type == "空所記入問題":
-		e = browser.find_element_by_xpath("//*[@data-name=\"login_id\"]")
-		e.clear()
-		e.send_keys(user_id)
+		for ans in result:
+			ans_form = browser.find_element_by_xpath("//*[@class=\"blank_container\"]/input")
+			ans_form.clear()
+			ans_form.send_keys(ans)
+			time.sleep(0.5)
+
+		btn = browser.find_element_by_xpath(".answer.btn.btn-warning")
+		btn.click()
 
 	stop_time = random.randint(1,3)
 	time.sleep(stop_time)
@@ -276,8 +283,10 @@ def AutoAnsExtraction(answer,question):
 
 	return final_Ans
 
+"""
 def AutoSelect():
-    quest = 
+    quest =
+"""
 
 def main():
 	login()
