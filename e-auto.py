@@ -27,7 +27,7 @@ options = webdriver.ChromeOptions()
 options.add_argument("--ignore-certificate-errors")
 options.add_argument("--ignore-ssl-errors")
 browser = webdriver.Chrome(chromedriver_path,options=options)
-browser.implicitly_wait(1)
+browser.implicitly_wait(5)
 
 root_URL = "https://www.brains-el.jp"
 
@@ -230,18 +230,25 @@ def AutoAns(question_type,question_japanese,question_text):
 
 			for ans in ans_list:
 				#選択肢の中身
-				ans_word : str = ans.get("data-answer")
+				ans_word : str = ans.get("data-answer").split()
 
 				print("ans_word:",ans_word)
 				print("word:",result)
 
-				if ans_word == result[0]:
-					result.remove(ans_word)
-					ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
-					print(ans_word)
+				if len(ans_word) == 1:
+					if ans_word == result[0]:
+						result.remove(ans_word)
+						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
+						print(ans_word)
+						break
+				elif len(ans_word) > 1:
+					if ans_word == result[0]:
+						result.remove(ans_word)
+						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
+						print(ans_word)
+						break
+				elif not result:
 					break
-			if not result:
-				break
 
 		for ans_btn in ans_btns:
 			btn = browser.find_element_by_xpath(ans_btn)
@@ -270,18 +277,13 @@ def AutoAns(question_type,question_japanese,question_text):
 
 
 def AutoAnsExtraction(answer,question):
-	final_Ans: list = []
-	while True:
-		if answer == []:
-			break
-		elif answer[0] == question[0]:
-			del answer[0] , question[0]
+	for ques in question:
+		if ques in answer:
+			answer.remove(ques)
+		else:
+			continue
 
-		elif answer[0] != question[0]:
-			final_Ans.append(answer[0])
-			del answer[0]
-
-	return final_Ans
+	return answer
 
 """
 def AutoSelect():
