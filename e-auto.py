@@ -138,7 +138,7 @@ def AutoQuestionSelect(lesson_URL):
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		while True:
-			stop_time = random.randint(3,40)
+			stop_time = random.randint(1,6)#元(3,40)テスト推奨(7,20)
 			print("sleep in",stop_time)
 			time.sleep(stop_time)
 			print("sleep out")
@@ -188,13 +188,13 @@ def AutoAns(question_type,question_japanese,question_text):
 	with open(os.path.join(basePath,"lesson.json"), encoding='utf-8') as f:
 		ans_json = json.load(f)
 
-	answer: list = (ans_json[question_japanese]).split()
+	answer: list = (ans_json[question_japanese]).split()#jsonfileからの英文
 	print(answer)
-	question: list = question_text.split()
+	question: list = question_text.split()#webページからの英文
 
 	#解答に必要なリストを取得
 	result: list  = AutoAnsExtraction(list(answer),list(question))
-	result = [res.strip(".").strip("?").strip("!") for res in result]
+	result = [res.strip(".").strip("?").strip("!") for res in result]#jsonとwebから導いた解答の英単語
 	print(result)
 	soup = BeautifulSoup(browser.page_source,"lxml")
 
@@ -230,20 +230,23 @@ def AutoAns(question_type,question_japanese,question_text):
 
 			for ans in ans_list:
 				#選択肢の中身
-				ans_word : str = ans.get("data-answer").split()
+				ans_word : str = ans.get("data-answer").split()#下に転がってる解答するためのボタンの中の英文
 
 				print("ans_word:",ans_word)
 				print("word:",result)
 
 				if len(ans_word) == 1:
+					ans_word = "".join(ans_word)
 					if ans_word == result[0]:
 						result.remove(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
 						print(ans_word)
 						break
 				elif len(ans_word) > 1:
-					if ans_word == result[0]:
-						result.remove(ans_word)
+					hw_long = len(result) - len(ans_word)
+					if len(AutoAnsExtraction(result,ans_word)) == hw_long :
+						result.remove(ans_word[:hw_long])
+						ans_word = " ".join(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
 						print(ans_word)
 						break
@@ -276,7 +279,7 @@ def AutoAns(question_type,question_japanese,question_text):
 
 
 
-def AutoAnsExtraction(answer,question):
+def AutoAnsExtraction(answer,question):#answer = jsonfileから読み取った英文　question = webページから受け取った英文
 	for ques in question:
 		if ques in answer:
 			answer.remove(ques)
