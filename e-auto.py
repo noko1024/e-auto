@@ -121,7 +121,6 @@ def AutoQuestionSelect(lesson_URL):
 			btn_chk = question.select(".class_button.btn.btn-warning")
 			if not btn_chk:
 				continue
-			question_type = question.find("span",{"class":"step_name"}).get_text()
 			break
 
 		if not question_type:
@@ -142,7 +141,7 @@ def AutoQuestionSelect(lesson_URL):
 			print("sleep in",stop_time)
 			time.sleep(stop_time)
 			print("sleep out")
-			get_bool,question_japanese,question_text = GetAns()
+			get_bool,question_type,question_japanese,question_text = GetAns()
 			print(get_bool)
 			if not get_bool:
 				break
@@ -163,12 +162,14 @@ def GetAns():
 			question_text = soup.find("p",{"class":"blanked_text"}).get_text()
 			question_text: str = re.sub("-+","",question_text)
 			question_japanese: str = soup.find("p",{"class":"hint_japanese"}).get_text().strip()
+            question_type: str = soup.find("div",{"class":"pull-left"}).get_text().split()[2]
+            question_type_index = question_type.find("（")
+            question_type = question_type[:question_type_index]
 			break
 		except:
 			if count == 2:
 				get_bool = False
-				question_text = None
-				question_japanese = None
+				question_text = question_japanese = question_type = None
 				break
 			else:
 				count += 1
@@ -177,10 +178,10 @@ def GetAns():
 				time.sleep(1)
 				continue
 	print("question")
-	print(question_japanese,question_text)
+	print(question_type,question_japanese,question_text)
 	print("----")
 
-	return get_bool,question_japanese,question_text
+	return get_bool,question_type,question_japanese,question_text
 
 def AutoAns(question_type,question_japanese,question_text):
 
