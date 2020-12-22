@@ -123,10 +123,6 @@ def AutoQuestionSelect(lesson_URL):
 				continue
 			break
 
-		if not question_type:
-			break
-
-
 		#lessson_num:lessonいくつかを取得
 		#course_num : courseを取得(通常レッスンとランダム演習の判定に利用)
 
