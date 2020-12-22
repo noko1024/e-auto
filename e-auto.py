@@ -162,9 +162,9 @@ def GetAns():
 			question_text = soup.find("p",{"class":"blanked_text"}).get_text()
 			question_text: str = re.sub("-+","",question_text)
 			question_japanese: str = soup.find("p",{"class":"hint_japanese"}).get_text().strip()
-            question_type: str = soup.find("div",{"class":"pull-left"}).get_text().split()[2]
-            question_type_index = question_type.find("（")
-            question_type = question_type[:question_type_index]
+			question_type: str = soup.find("div",{"class":"pull-left"}).get_text().split()[2]
+			question_type_index = question_type.find("（")
+			question_type = question_type[:question_type_index]
 			break
 		except:
 			if count == 2:
