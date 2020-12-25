@@ -129,7 +129,6 @@ def AutoQuestionSelect(lesson_URL):
 		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
 		btn.click()
 
-		print(question_type)
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		while True:
