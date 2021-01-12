@@ -224,7 +224,7 @@ def AutoAns(question_type,question_japanese,question_text):
 			btn = browser.find_element_by_xpath(ans_btn)
 			btn.click()
 
-	elif question_type =="並べ替え問題":
+	elif question_type.startswith("並べ替え"):
 		print("並べ替え問題だよ")
 
 		ans_list = soup.select(".each_choice.ui-draggable.ui-draggable-handle")
@@ -242,16 +242,17 @@ def AutoAns(question_type,question_japanese,question_text):
 
 				if len(ans_word) == 1:
 					ans_word = "".join(ans_word)
-					print(len(ans_word))
+					print("問題のボタンが1単語のとき",len(ans_word))
 					if ans_word == result[0]:
 						result.remove(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
 						ans_btns.click()
 						print(ans_word)
 						break
+					break
 				elif len(ans_word) >= 2:
 					hw_long = len(result) - len(ans_word)
-					print(hw_long)
+					print("問題のボタンが1単語じゃないとき",hw_long)
 					if len(AutoAnsExtraction(result,ans_word)) == hw_long :
 						result.remove(ans_word[:hw_long])
 						ans_word = " ".join(ans_word)
@@ -259,7 +260,8 @@ def AutoAns(question_type,question_japanese,question_text):
 						ans_btns.click()
 						print(ans_word)
 						break
-				elif not result:
+					break
+				elif result == None:
 					break
 
 		for ans_btn in ans_btns:
