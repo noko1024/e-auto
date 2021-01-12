@@ -129,7 +129,6 @@ def AutoQuestionSelect(lesson_URL):
 		btn = browser.find_element_by_css_selector(".class_button.btn.btn-warning")
 		btn.click()
 
-		print(question_type)
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		while True:
@@ -158,7 +157,11 @@ def GetAns():
 			question_text = soup.find("p",{"class":"blanked_text"}).get_text()
 			question_text: str = re.sub("-+","",question_text)
 			question_japanese: str = soup.find("p",{"class":"hint_japanese"}).get_text().strip()
-			question_type: str = soup.find("div",{"class":"pull-left"}).get_text().split()[2]
+			print(question_japanese,question_text)
+			question_type: str = soup.select("div.pull-left")[1]
+			print("question_type:",question_type)
+			question_type = question_type.get_text().split()[2]
+			print("question_type:",question_type)
 			question_type_index = question_type.find("（")
 			question_type = question_type[:question_type_index]
 			break
@@ -180,6 +183,7 @@ def GetAns():
 	return get_bool,question_type,question_japanese,question_text
 
 def AutoAns(question_type,question_japanese,question_text):
+	print("オートアンスに入ったよ")
 
 	#jsonFileの読み込み
 	with open(os.path.join(basePath,"lesson.json"), encoding='utf-8') as f:
@@ -194,8 +198,11 @@ def AutoAns(question_type,question_japanese,question_text):
 	result = [res.strip(".").strip("?").strip("!") for res in result]#jsonとwebから導いた解答の英単語
 	print(result)
 	soup = BeautifulSoup(browser.page_source,"lxml")
+	print("オートアンスの処理終わったよ")
+	print("pestion_type:",question_type)
 
 	if question_type == "択一問題":
+		print("択一問題だよ")
 
 		ans_list = soup.select(".each_choice")
 
@@ -218,6 +225,7 @@ def AutoAns(question_type,question_japanese,question_text):
 			btn.click()
 
 	elif question_type =="並べ替え問題":
+		print("並べ替え問題だよ")
 
 		ans_list = soup.select(".each_choice.ui-draggable.ui-draggable-handle")
 
@@ -234,17 +242,21 @@ def AutoAns(question_type,question_japanese,question_text):
 
 				if len(ans_word) == 1:
 					ans_word = "".join(ans_word)
+					print(len(ans_word))
 					if ans_word == result[0]:
 						result.remove(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
+						ans_btns.click()
 						print(ans_word)
 						break
-				elif len(ans_word) > 1:
+				elif len(ans_word) >= 2:
 					hw_long = len(result) - len(ans_word)
+					print(hw_long)
 					if len(AutoAnsExtraction(result,ans_word)) == hw_long :
 						result.remove(ans_word[:hw_long])
 						ans_word = " ".join(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
+						ans_btns.click()
 						print(ans_word)
 						break
 				elif not result:
@@ -287,7 +299,7 @@ def AutoAnsExtraction(answer,question):#answer = jsonfileから読み取った�
 
 """
 def AutoSelect():
-    quest =
+	quest =
 """
 
 def main():
