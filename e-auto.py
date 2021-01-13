@@ -163,7 +163,8 @@ def GetAns():
 			question_type = question_type.get_text().split()[2]
 			print("question_type:",question_type)
 			question_type_index = question_type.find("（")
-			question_type = question_type[:question_type_index]
+			if question_type_index != -1:
+				question_type = question_type[:question_type_index]
 			break
 		except:
 			if count == 2:
