@@ -132,7 +132,7 @@ def AutoQuestionSelect(lesson_URL):
 		time.sleep(1)
 		#ここで自動解答関数を呼ぶ
 		while True:
-			stop_time = random.randint(1,6)#元(3,40)テスト推奨(7,20)
+			stop_time = random.randint(10,20)#元(3,40)テスト推奨(7,20)
 			print("sleep in",stop_time)
 			time.sleep(stop_time)
 			print("sleep out")
@@ -235,34 +235,38 @@ def AutoAns(question_type,question_japanese,question_text):
 		while True:
 
 			for ans in ans_list:
+				#ここでなんらかの処理をし、ans_listに変更を加える
 				#選択肢の中身
 				ans_word : str = ans.get("data-answer").split()#下に転がってる解答するためのボタンの中の英文
 
 				print("ans_word:",ans_word)
 				print("word:",result)
 
+
+
+				#もし問題のボタンが1単語のとき
 				if len(ans_word) == 1:
 					ans_word = "".join(ans_word)
 					print("問題のボタンが1単語のとき",len(ans_word))
 					if ans_word == result[0]:
 						result.remove(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
-						ans_btns.click()
 						print(ans_word)
 						break
 					break
+
+				#もし問題のボタンが1単語でないとき
 				elif len(ans_word) >= 2:
 					hw_long = len(result) - len(ans_word)
 					print("問題のボタンが1単語じゃないとき",hw_long)
 					if len(AutoAnsExtraction(result,ans_word)) == hw_long :
-						result.remove(ans_word[:hw_long])
+						result.remove(ans_word[hw_long])
 						ans_word = " ".join(ans_word)
 						ans_btns.append(f"//a[@data-answer=\"{ans_word}\"]")
-						ans_btns.click()
 						print(ans_word)
-						break
 					break
-				elif result == None:
+
+				if result == []:
 					break
 
 		for ans_btn in ans_btns:
